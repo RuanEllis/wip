@@ -10,6 +10,11 @@ postgresql-setup initdb
 sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl enable postgresql
 
+
+#Ensure pam-devel is installed...
+
+yum -y -e0 install pam-devel
+
 cd /appliance/flighthub-gui
 
 bundle install
