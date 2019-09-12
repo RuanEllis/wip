@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /appliance/flighthub-gui
+
 sed -i "s@APPLICATION_NAME=ABC@APPLICATION_NAME='$alces_APPLIANCE_NAME'@g;s@^#SECRET_KEY_BASE=.*@SECRET_KEY_BASE=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 25)@g" .env
 sed -i 's@^export APPLIANCE_INFORMATION_FILE_PATH=ABC@export APPLIANCE_INFORMATION_FILE_PATH=/appliance/cluster.md@g;s@^#RAILS_SERVE_STATIC_FILES@RAILS_SERVE_STATIC_FILES@g;s@^export SSH_KEYS_FILE_PATH=ABC@export SSH_KEYS_FILE_PATH=/appliance/siteadmin/.ssh/authorized_keys@g;s@export NETWORK_VARIABLES_FILE_PATH=ABC@export NETWORK_VARIABLES_FILE_PATH=/appliance/scripts/vars.sh@g;s@export NETWORK_SETUP_SCRIPT_FILE_PATH=ABC@export NETWORK_SETUP_SCRIPT_FILE_PATH=/appliance/scripts/personality_base.sh@g' .env
 alces_SITEADMIN_PASS='alcestest'
@@ -12,12 +14,10 @@ postgresql-setup initdb
 sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl enable postgresql
 
-
 #Ensure pam-devel is installed...
 
 yum -y -e0 install pam-devel
 
-cd /appliance/flighthub-gui
 
 bundle install
 
