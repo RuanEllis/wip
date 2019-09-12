@@ -19,10 +19,6 @@ rvm --default use 2.5.0
 ## Install postgresql 9.6
 yum -y install postgresql-server postgresql-devel
 
-postgresql-setup initdb
-sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
-systemctl enable postgresql
-
 ## Install node.js 8.12.0
 curl -sL https://rpm.nodesource.com/setup_8.x | bash -
 yum -y install nodejs-8.12.0

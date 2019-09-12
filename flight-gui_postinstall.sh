@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#Setup Postgres
+
+postgresql-setup initdb
+sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
+systemctl enable postgresql
+
 cd /appliance/flighthub-gui
 
 bundle install
