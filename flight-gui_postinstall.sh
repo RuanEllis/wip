@@ -1,5 +1,9 @@
 #!/bin/bash
 
+alces_SITEADMIN_PASS='alcestest'
+
+echo "Password for DB = ${alces_SITEADMIN_PASS}"
+
 #Setup Postgres
 
 postgresql-setup initdb

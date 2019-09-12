@@ -50,6 +50,7 @@ cd /appliance/flight-terminal-service
 yarn
 
 ## Flighthub-GUI setup
+yum -y -e0 install pam-devel
 cd /appliance/
 git clone https://github.com/alces-software/flighthub-gui.git
 cd flighthub-gui
