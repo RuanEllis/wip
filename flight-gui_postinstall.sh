@@ -38,7 +38,7 @@ Requires=network.target postgresql.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/appliance/flight-gui
+WorkingDirectory=/appliance/flighthub-gui
 ExecStart=/usr/bin/bash -lc 'bundle exec bin/rails server -e production --port 80'
 TimeoutSec=30
 RestartSec=15
