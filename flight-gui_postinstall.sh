@@ -18,7 +18,6 @@ systemctl enable postgresql
 
 yum -y -e0 install pam-devel
 
-
 bundle install
 
 ## Generate database
@@ -74,6 +73,7 @@ EOF
 firewall-cmd --new-service flight-gui --permanent
 firewall-cmd --permanent --service=flight-gui --set-description="Flight management web interface" --add-port=25288/tcp --add-port=80/tcp --add-port=443/tcp
 firewall-cmd --add-service flight-gui --zone internal --permanent
+firewall-cmd --add-service flight-gui --zone external --permanent
 firewall-cmd --reload
 
 
