@@ -46,7 +46,7 @@ Requires=network.target postgresql.service
 Type=simple
 User=root
 WorkingDirectory=/appliance/flighthub-gui
-ExecStart=/usr/bin/bash -lc 'bundle exec bin/rails server -e production --port 80'
+ExecStart=/usr/bin/bash -lc 'bundle exec bin/rails server -e production --port 3000'
 TimeoutSec=30
 RestartSec=15
 Restart=always
@@ -85,3 +85,99 @@ systemctl enable flight-gui.service
 systemctl enable flight-terminal.service
 systemctl start flight-gui
 systemctl start flight-terminal
+
+yum -y install nginx
+rm -rf /etc/nginx/*
+
+cat << 'EOF' > /etc/nginx/nginx.conf
+user nobody;
+worker_processes 1;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    #include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log /var/log/nginx/access.log main;
+    sendfile on;
+    #tcp_nopush on;
+    keepalive_timeout 65;
+    gzip on;
+    include /etc/nginx/http.d/*.conf;
+}
+EOF
+
+mkdir /etc/nginx/http.d
+
+cat << EOF > /etc/nginx/http.d/http.conf
+server {
+  listen 80 default;
+  include /etc/nginx/server-http.d/*.conf;
+}
+EOF
+
+cat << EOF > /etc/nginx/http.d/https.conf
+server {
+  listen 443 ssl default;
+  include /etc/nginx/server-https.d/*.conf;
+}
+EOF
+
+mkdir /etc/nginx/server-http{,s}.d
+
+cat << EOF > /etc/nginx/server-https.d/ssl-config.conf
+client_max_body_size 0;
+
+# add Strict-Transport-Security to prevent man in the middle attacks
+add_header Strict-Transport-Security "max-age=31536000";
+
+ssl_certificate /etc/ssl/nginx/fullchain.pem;
+ssl_certificate_key /etc/ssl/nginx/key.pem;
+ssl_session_cache shared:SSL:1m;
+ssl_session_timeout 5m;
+ssl_ciphers HIGH:!aNULL:!MD5;
+ssl_prefer_server_ciphers on;
+EOF
+
+mkdir /etc/ssl/nginx
+
+# Generic key
+openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/nginx/key.pem -out /etc/ssl/nginx/fullchain.pem -days 365 -nodes -subj "/C=UK/O=Alces Flight/CN=appliance.alces.network"
+
+cat << 'EOF' > /etc/nginx/server-https.d/overware.conf
+location / {
+     proxy_pass http://127.0.0.1:3000;
+     proxy_redirect off;
+     proxy_set_header X-Real-IP  $remote_addr;
+     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     proxy_set_header Host $http_host;
+     proxy_set_header X-NginX-Proxy true;
+     proxy_set_header X-Forwarded-Proto $scheme;
+     proxy_temp_path /tmp/proxy_temp;
+}
+EOF
+
+cat << 'EOF' > /etc/nginx/server-https.d/flight-terminal.conf
+location /terminal-service {
+     proxy_pass http://127.0.0.1:25288;
+     proxy_redirect off;
+     proxy_set_header X-Real-IP  $remote_addr;
+     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+     proxy_set_header Host $http_host;
+     proxy_set_header X-NginX-Proxy true;
+}
+EOF
+
+cat << 'EOF' > /etc/nginx/server-http.d/redirect-http-to-https.conf
+return 307 https://$host$request_uri;
+EOF
+
+systemctl enable nginx
+systemctl restart nginx
