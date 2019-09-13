@@ -181,3 +181,7 @@ EOF
 
 systemctl enable nginx
 systemctl restart nginx
+
+
+#In here for now - will go in next image build.
+ln -snf /opt/appliance/bin/cli.rb /usr/bin/alces-appliance
