@@ -22,17 +22,16 @@ yum -y -e0 install pam-devel
 bundle install
 
 ## Generate database
+systemctl stop postgresql
+systemctl start postgresql
+sleep 10
 RAILS_ENV=production bin/rails db:create
 RAILS_ENV=production bin/rails db:schema:load
 RAILS_ENV=production bin/rails data:migrate
 
-## Create siteadmin Overware user
-echo "User.create(username: 'siteadmin', password: '$alces_SITEADMIN_PASS')" |RAILS_ENV=production rails console
-
 ## Enable bolt-ons
 echo "bolt_on = BoltOn.find_by(name: 'VPN') ; bolt_on.enabled = true ; bolt_on.save! " |RAILS_ENV=production rails console
 echo "bolt_on = BoltOn.find_by(name: 'Console') ; bolt_on.enabled = true ; bolt_on.save! " |RAILS_ENV=production rails console
-echo "bolt_on = BoltOn.find_by(name: 'Assets') ; bolt_on.enabled = true ; bolt_on.save! " |RAILS_ENV=production rails console
 
 ## Compile assets
 rake assets:precompile
@@ -86,6 +85,7 @@ systemctl enable flight-terminal.service
 systemctl start flight-gui
 systemctl start flight-terminal
 
+yum -y install epel-release
 yum -y install nginx
 rm -rf /etc/nginx/*
 
