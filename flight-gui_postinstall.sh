@@ -13,7 +13,7 @@ echo "Password for DB = ${alces_SITEADMIN_PASS}"
 postgresql-setup initdb
 sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl enable postgresql
-systemctl start post
+systemctl start postgresql
 
 #Ensure pam-devel is installed...
 
