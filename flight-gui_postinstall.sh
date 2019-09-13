@@ -13,6 +13,7 @@ echo "Password for DB = ${alces_SITEADMIN_PASS}"
 postgresql-setup initdb
 sed -i 's/peer$/trust/g;s/ident$/trust/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl enable postgresql
+systemctl start post
 
 #Ensure pam-devel is installed...
 
@@ -82,3 +83,5 @@ systemctl daemon-reload
 
 systemctl enable flight-gui.service
 systemctl enable flight-terminal.service
+systemctl start flight-gui
+systemctl start flight-terminal
