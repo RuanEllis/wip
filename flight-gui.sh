@@ -60,3 +60,4 @@ fi
 cp .env.example .env
 touch /appliance/cluster.md
 
+export FREE_TSHIRT=1
