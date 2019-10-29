@@ -59,4 +59,3 @@ if [ ! -z $VERSION ] ; then
 fi
 cp .env.example .env
 touch /appliance/cluster.md
-
